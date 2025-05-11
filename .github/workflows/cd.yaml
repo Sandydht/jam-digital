@@ -41,6 +41,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             docker kill jam-digital
+            docker rm -f jam-digital
             docker system prune -a
             docker pull sandydht/jam-digital:${{ env.TAG }}
             docker run -dp 3000:3000 --name jam-digital sandydht/jam-digital:${{ env.TAG }}
