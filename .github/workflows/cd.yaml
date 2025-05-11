@@ -2,8 +2,10 @@ name: Build and Push to Docker Hub on Tag
 
 on:
   push:
+    branches:
+      - master
     tags:
-      - "v*"
+      - 'v*'
 
 jobs:
   build-and-push:
