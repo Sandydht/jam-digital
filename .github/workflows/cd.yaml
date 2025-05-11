@@ -28,12 +28,10 @@ jobs:
         id: tag
         run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/jam-digital:${{ env.TAG }}
+      - name: Build and Push Multi-Platform Docker Image
+        run: |
+          docker buildx build --platform linux/amd64,linux/arm64 -t ${{ secrets.DOCKER_USERNAME }}/jam-digital:${{ env.TAG }} . --push
+
       - name: SSH and deploy app
         uses: appleboy/ssh-action@master
         with:
@@ -42,7 +40,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            docker stop jam-digital
+            docker kill jam-digital
             docker system prune -a
             docker pull sandydht/jam-digital:${{ env.TAG }}
             docker run -dp 3000:3000 --name jam-digital sandydht/jam-digital:${{ env.TAG }}
