@@ -32,3 +32,14 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/jam-digital:${{ env.TAG }}
+      - name: SSH and deploy app
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            docker rm -f jam-digital
+            docker pull sandydht/jam-digital:${{ env.TAG }}
+            docker run -dp 3000:3000 --name jam-digital sandydht/jam-digital:${{ env.TAG }}
