@@ -45,7 +45,7 @@ jobs:
 
             for i in {1..10}; do
               if curl -s http://localhost:3001/health; then
-                echo "app_v2 is healthy!";
+                echo "jam-digital-2 is healthy!";
                 break;
               fi
               sleep 3
