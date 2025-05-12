@@ -30,7 +30,7 @@ jobs:
 
       - name: Build and Push Multi-Platform Docker Image
         run: |
-          docker buildx build --platform linux/amd64,linux/arm64 -t ${{ secrets.DOCKER_USERNAME }}/jam-digital:${{ env.TAG }} . --push
+          docker buildx build --platform linux/amd64,linux/arm64 -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ env.TAG }} . --push
 
       - name: SSH and deploy app
         uses: appleboy/ssh-action@master
@@ -40,19 +40,40 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            docker pull sandydht/jam-digital:test
-            docker run -dp 3001:3000 --name jam-digital-2 sandydht/jam-digital:test
+            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:test
+            docker run -dp ${{ secrets.DOCKER_CONTAINER_PORT_2 }}:${{ secrets.DOCKER_IMAGE_PORT }} --name ${{ secrets.DOCKER_CONTAINER_NAME_2 }} ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:test
 
             for i in {1..10}; do
-              if curl -s http://localhost:3001/health; then
-                echo "jam-digital-2 is healthy!";
-                break;
+              if curl -s http://localhost:${{ secrets.DOCKER_CONTAINER_PORT_2 }}/health; then
+                echo "${{ secrets.DOCKER_CONTAINER_NAME_2 }} is healthy!";
+                exit 0
               fi
               sleep 3
             done
+            exit 1
 
-            docker stop jam-digital-1 || true
-            docker rm jam-digital-1 || true
-
-            docker rename jam-digital-2 jam-digital-1
+      - name: Promote health check passed
+        if: success()
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            docker stop ${{ secrets.DOCKER_CONTAINER_NAME_1 }} || true
+            docker rm ${{ secrets.DOCKER_CONTAINER_NAME_1 }} || true
+            docker rename ${{ secrets.DOCKER_CONTAINER_NAME_2 }} ${{ secrets.DOCKER_CONTAINER_NAME_1 }}
             sudo nginx -s reload
+      
+      - name: Rollback health check unpassed
+        if: failure()
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            docker stop ${{ secrets.DOCKER_CONTAINER_NAME_2 }} || true
+            docker rm ${{ secrets.DOCKER_CONTAINER_NAME_2 }} || true
