@@ -40,8 +40,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            docker system prune -a --volumes
-            y
+            docker rmi -f $(docker images -aq)
             docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ env.TAG }}
             docker run -dp ${{ secrets.DOCKER_CONTAINER_PORT_2 }}:${{ secrets.DOCKER_IMAGE_PORT }} --name ${{ secrets.DOCKER_CONTAINER_NAME_2 }} ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ env.TAG }}
 
