@@ -1,3 +1,5 @@
+'use client'
+
 // pages/_document.tsx
 // eslint-disable-next-line @next/next/no-document-import-in-page
 import Document, { Html, Head, Main, NextScript, DocumentContext } from 'next/document';
@@ -17,6 +19,8 @@ class MyDocument extends Document {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const nonce = this.props.nonce;
+
+    console.log('nonce: ', nonce);
 
     return (
       <Html>
