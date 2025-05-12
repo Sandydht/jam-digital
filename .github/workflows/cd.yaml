@@ -40,8 +40,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}::${{ env.TAG }}
-            docker run -dp ${{ secrets.DOCKER_CONTAINER_PORT_2 }}:${{ secrets.DOCKER_IMAGE_PORT }} --name ${{ secrets.DOCKER_CONTAINER_NAME_2 }} ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}::${{ env.TAG }}
+            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ env.TAG }}
+            docker run -dp ${{ secrets.DOCKER_CONTAINER_PORT_2 }}:${{ secrets.DOCKER_IMAGE_PORT }} --name ${{ secrets.DOCKER_CONTAINER_NAME_2 }} ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ env.TAG }}
 
             for i in {1..10}; do
               if curl -s http://localhost:${{ secrets.DOCKER_CONTAINER_PORT_2 }}/health; then
@@ -52,7 +52,7 @@ jobs:
             done
             exit 1
 
-      - name: Promote health check passed
+      - name: Promote if health check passed
         if: success()
         uses: appleboy/ssh-action@master
         with:
@@ -66,7 +66,7 @@ jobs:
             docker rename ${{ secrets.DOCKER_CONTAINER_NAME_2 }} ${{ secrets.DOCKER_CONTAINER_NAME_1 }}
             sudo nginx -s reload
       
-      - name: Rollback health check unpassed
+      - name: Rollback if health check unpassed
         if: failure()
         uses: appleboy/ssh-action@v1.0.3
         with:
