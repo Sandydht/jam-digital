@@ -65,6 +65,7 @@ jobs:
             docker rm ${{ secrets.DOCKER_CONTAINER_NAME_1 }} || true
             docker rename ${{ secrets.DOCKER_CONTAINER_NAME_2 }} ${{ secrets.DOCKER_CONTAINER_NAME_1 }}
             sudo nginx -s reload
+            docker system prune -a
       
       - name: Rollback if health check unpassed
         if: failure()
@@ -77,3 +78,4 @@ jobs:
           script: |
             docker stop ${{ secrets.DOCKER_CONTAINER_NAME_2 }} || true
             docker rm ${{ secrets.DOCKER_CONTAINER_NAME_2 }} || true
+            docker system prune -a
