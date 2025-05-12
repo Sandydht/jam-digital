@@ -40,8 +40,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:test
-            docker run -dp ${{ secrets.DOCKER_CONTAINER_PORT_2 }}:${{ secrets.DOCKER_IMAGE_PORT }} --name ${{ secrets.DOCKER_CONTAINER_NAME_2 }} ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:test
+            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}::${{ env.TAG }}
+            docker run -dp ${{ secrets.DOCKER_CONTAINER_PORT_2 }}:${{ secrets.DOCKER_IMAGE_PORT }} --name ${{ secrets.DOCKER_CONTAINER_NAME_2 }} ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}::${{ env.TAG }}
 
             for i in {1..10}; do
               if curl -s http://localhost:${{ secrets.DOCKER_CONTAINER_PORT_2 }}/health; then
