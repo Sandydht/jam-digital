@@ -40,9 +40,19 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            docker kill jam-digital
-            docker rm -f jam-digital
-            docker system prune -a
-            y
             docker pull sandydht/jam-digital:${{ env.TAG }}
-            docker run -dp 3000:3000 --name jam-digital sandydht/jam-digital:${{ env.TAG }}
+            docker run -dp 3001:3000 --name jam-digital-2 sandydht/jam-digital:${{ env.TAG }}
+
+            for i in {1..10}; do
+              if curl -s http://localhost:3001/health; then
+                echo "app_v2 is healthy!";
+                break;
+              fi
+              sleep 3
+            done
+
+            docker stop jam-digital-1 || true
+            docker rm jam-digital-1 || true
+
+            docker rename jam-digital-2 jam-digital-1
+            sudo nginx -s reload
