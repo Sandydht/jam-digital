@@ -28,11 +28,9 @@ jobs:
         id: tag
         run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
-      - name: Build and Push Docker Image for amd64
-        run: docker buildx build --platform linux/amd64 -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ env.TAG }} . --push
-
-      - name: Build and Push Docker Image for arm64
-        run: docker buildx build --platform linux/arm64 -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ env.TAG }} . --push
+      - name: Build and Push Multi-Platform Docker Image
+        run: |
+          docker buildx build --platform linux/amd64,linux/arm64 -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ env.TAG }} . --push
 
       - name: SSH and deploy app
         uses: appleboy/ssh-action@master
